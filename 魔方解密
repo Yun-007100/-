@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>魔方解密-從零開始的還原之旅</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* 奶茶色系配色定義 */
+        :root {
+            --dark-milk-tea: #8C7A6B;  /* 深奶茶色 */
+            --milk-tea: #BFA893;       /* 標準奶茶色 */
+            --light-milk-tea: #D9C5B2; /* 淺奶茶色 */
+            --creamy-white: #F5EBE6;   /* 奶油白 */
+            --white: #FFFFFF;
+            --overlay: rgba(0, 0, 0, 0.4);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            /* 💡 套用思源黑體與蘋方，讓字體線條更有設計感，並微調字距（letter-spacing）提升高級感 */
+            font-family: "Noto Sans TC", "PingFang TC", "Apple LiGothic Medium", "Heiti TC", sans-serif;
+            letter-spacing: 0.5px;
+        }
+
+        body {
+            background-color: var(--creamy-white);
+            color: #4A3E3D;
+            line-height: 1.7; /* 稍微拉開行高，閱讀更不費力 */
+            padding-bottom: 60px;
+        }
+
+        /* 頂部標題區 */
+        header {
+            background-color: var(--dark-milk-tea);
+            color: var(--white);
+            text-align: center;
+            padding: 4rem 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 0.8rem;
+            letter-spacing: 4px;
+            font-weight: 700;
+        }
+
+        header p {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            letter-spacing: 2px;
+            font-weight: 300; /* 使用較輕的字重呈現副標題 */
+        }
+
+        /* 主體內容限制寬度 */
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        /* 個人介紹與心得區塊 */
+        .intro-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .intro-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background-color: var(--white);
+            border-left: 5px solid var(--milk-tea);
+            padding: 1.8rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        }
+
+        .card h2 {
+            color: var(--dark-milk-tea);
+            margin-bottom: 1.2rem;
+            border-bottom: 1px solid var(--creamy-white);
+            padding-bottom: 0.5rem;
+            letter-spacing: 3px;
+            font-weight: 700;
+            font-size: 1.4rem;
+        }
+
+        /* 心得內文排版 */
+        .card p {
+            text-align: justify;
+            font-size: 1.05rem;
+            font-weight: 400;
+            color: #5A4E4D;
+        }
+
+        /* 按鈕與主題展示區 */
+        .menu-title {
+            text-align: center;
+            color: var(--dark-milk-tea);
+            margin-bottom: 1.8rem;
+            font-size: 1.8rem;
+            letter-spacing: 3px;
+            font-weight: 700;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .topic-box {
+            background-color: var(--light-milk-tea);
+            border-radius: 8px;
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .topic-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(140,122,107,0.15);
+        }
+
+        /* 學習主題按鈕 */
+        .btn {
+            display: inline-block;
+            background-color: var(--dark-milk-tea);
+            color: var(--white);
+            padding: 0.8rem 1.5rem;
+            text-decoration: none;
+            border-radius: 20px;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            transition: background 0.3s;
+            border: none;
+            cursor: pointer;
+            width: 90%;
+            font-size: 1.15rem;
+            letter-spacing: 2px;
+        }
+
+        .btn:hover {
+            background-color: #736356;
+        }
+
+        /* 固定在右下角的回首頁按鈕 */
+        .back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--dark-milk-tea);
+            color: var(--white);
+            padding: 0.8rem 1.2rem;
+            border-radius: 50px;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s;
+            z-index: 1000;
+            letter-spacing: 1px;
+        }
+
+        .back-to-top:hover {
+            background-color: var(--milk-tea);
+            transform: scale(1.05);
+        }
+
+        /* --- 彈出視窗 (Modal) 樣式 --- */
+        .modal {
+            display: none; 
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--overlay);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .modal:target {
+            display: flex; 
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            width: 100%;
+            max-width: 650px;
+            max-height: 85vh;
+            overflow-y: auto; 
+            border-radius: 12px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2.2rem;
+            text-decoration: none;
+            color: var(--dark-milk-tea);
+            font-weight: 300;
+        }
+
+        .modal-content h3 {
+            color: var(--dark-milk-tea);
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--light-milk-tea);
+            padding-bottom: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        /* 視窗內的小步驟小標題 */
+        .modal-content h4.section-subtitle {
+            color: var(--dark-milk-tea);
+            margin: 1.8rem 0 0.6rem 0;
+            font-size: 1.3rem;
+            border-left: 4px solid var(--milk-tea);
+            padding-left: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        /* 公式步驟排版 */
+        .formula-step {
+            background-color: var(--creamy-white);
+            padding: 1.2rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-size: 1.05rem;
+            color: #5A4E4D;
+        }
+
+        .formula-step h4 {
+            color: #5c4e46;
+            margin-bottom: 0.4rem;
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+        /* 💡 讓公式數字使用等寬字體並稍微放大，呈現鮮明對比 */
+        .code-box {
+            display: inline-block;
+            background-color: var(--dark-milk-tea);
+            color: var(--white);
+            padding: 0.3rem 1.2rem;
+            border-radius: 6px;
+            font-family: "Courier New", Courier, monospace;
+            font-weight: 700;
+            margin: 0.4rem 0;
+            font-size: 1.25rem;
+            letter-spacing: 3px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .source-link {
+            display: inline-block;
+            margin-top: 0.5rem;
+            color: var(--dark-milk-tea);
+            font-weight: 500;
+            text-decoration: underline;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="top"></div>
+
+    <header>
+        <h1>魔方解密-從零開始的還原之旅</h1>
+        <p>三階魔術方塊原理介紹、基礎解法與進階解法</p>
+    </header>
+
+    <div class="container">
+
+        <section class="intro-section">
+            <div class="card">
+                <h2>ABOUT ME</h2>
+                <p>
+                    學校：國立基隆高級中學<br>
+                    年級：高二<br>
+                    班級：10<br>
+                    座號：8<br>
+                    姓名：林秭荺
+                </p>
+            </div>
+            
+            <div class="card">
+                <h2>REFLECTIONS</h2>
+                <p>我認為學習魔術方塊使我在各方面都有所成長，像是從最一開始的了解魔方運轉方式，它提升了我的邏輯思考能力。背公式也是一門大學問，網路上有琳琅滿目的公式，但究竟哪一種才是最適合自己的呢？這讓我學會了統整，在我蒐集完無數筆資料後，我將資料系統化地統整起來，雖然剛開始背公式很痛苦，但在找到方法後，我豁然發現其實肌肉記憶會動的比大腦還快，這讓我了解到反覆練習必能變成本能。最後是速度，其實有時候過於急躁，或是太講求於速度，反而會導致魔方解體，因此我認為這是在訓練自己的心態、觀察力、耐心和應壓能力。未來我可以將這些能力融入其他學科裡，如運用自己的方法整理出一套屬於自己的讀書方法。也許魔方看似複雜，不過它讓我了解到萬物皆有規律，即使是再困難的問題都有辦法解決！</p>
+            </div>
+        </section>
+
+        <hr style="border: 0; height: 1px; background: var(--light-milk-tea); margin-bottom: 2.5rem;">
+
+        <h2 class="menu-title">核心學習內容</h2>
+        <section class="button-group">
+            
+            <div class="topic-box">
+                <a href="#modal-concept" class="btn">基本運作原理</a>
+                <p style="font-size: 1rem; color: #6E605F;">中心塊、邊塊與角塊的結構關係</p>
+            </div>
+
+            <div class="topic-box">
+                <a href="#modal-beginner-formula" class="btn">基礎公式</a>
+                <p style="font-size: 1rem; color: #6E605F;">David Guo的簡易解法</p>
+            </div>
+
+            <div class="topic-box">
+                <a href="#modal-advanced" class="btn">進階公式 (CFOP)</a>
+                <p style="font-size: 1rem; color: #6E605F;">速解步驟與減量背誦策略</p>
+            </div>
+
+        </section>
+
+    </div>
+
+    <a href="#top" class="back-to-top">▲ 回首頁</a>
+
+
+    <div id="modal-concept" class="modal">
+        <div class="modal-content">
+            <a href="#top" class="close-btn">&times;</a>
+            <h3>魔術方塊基本運作原理</h3>
+            
+            <div class="formula-step">
+                <h4>1. 認識魔術方塊的三種零件</h4>
+                <p>三階魔術方塊拆解後，會發現外觀是由三種功能完全不同的結構零件組成：</p>
+                <ul style="margin-left: 2rem; margin-top: 0.4rem;">
+                    <li><b>中心塊（6個）：</b>只有 1 個顏色。它是固定在內部六軸核心上的支點，決定了整個面還原時的顏色。</li>
+                    <li><b>邊塊（12個）：</b>有 2 個顏色。位於兩個中心塊的中間。</li>
+                    <li><b>角塊（8個）：</b>有 3 個顏色。位於方塊最邊邊的角落。</li>
+                </ul>
+            </div>
+            
+            <div class="formula-step">
+                <h4>2. 元件的定位與「互不轉換性」</h4>
+                <p>魔術方塊最重要的邏輯在於：中心塊相對位置永遠固定（如白對黃、藍對綠）。不論怎麼轉，邊塊永遠只能在邊塊的位置互換，角塊也永遠只能在角塊的位置互換。還原的本質是「各司其職」地將零件歸位。</p>
+            </div>
+            
+            <div class="formula-step">
+                <h4>3. 方塊是如何運轉的？</h4>
+                <p>方塊最中央有一個十字交叉的「六軸核心」，中心塊牢牢鎖在軸心上作為旋轉的軌道。當你轉動某一面時，是以該面的中心塊為支點，帶動周圍的零件移動。公式的本質就是利用這些軌道的交錯，重新排列方塊的位置。</p>
+            </div>
+
+            <hr style="border: 0; height: 1px; background: var(--light-milk-tea); margin: 1rem 0;">
+            <a href="https://cube.pinpincuber.com/3x3/concept/" target="_blank" class="source-link">🔗 參考來源：新魔方小天地 (PinPinCuber)</a>
+            <br><br>
+            <a href="#top" class="btn" style="width:100%; text-align:center;">關閉並回首頁</a>
+        </div>
+    </div>
+
+
+    <div id="modal-beginner-formula" class="modal">
+        <div class="modal-content">
+            <a href="#top" class="close-btn">&times;</a>
+            <h3>基礎公式：簡易解法與精進優化</h3>
+            <p style="font-size:0.95rem; margin-bottom:1rem; color:#7A6E6D;">※ 整合 David Guo 老師基礎三層與進階加速技巧：</p>
+            
+            <h4 class="section-subtitle">第一層與第二層精華</h4>
+            <div class="formula-step">
+                <h4>第一層還原</h4>
+                <p>先於黃色頂面完成白色十字（小雛菊），對齊側面顏色後轉至底層。接著利用基礎動作將四個底角歸位：</p>
+                <div class="code-box">1 2 4 5</div>
+            </div>
+            <div class="formula-step">
+                <h4>第二層邊塊歸位</h4>
+                <p>對齊側面中心塊後，依據目標邊塊移動方向使用對應公式：</p>
+                <p><b>往右移公式：</b><br><div class="code-box">2 1 5 4 5 3 1 6</div></p>
+                <p><b>往左移公式：</b><br><div class="code-box">5 4 1 2 1 6 4 3</div></p>
+            </div>
+
+            <h4 class="section-subtitle">第三層基礎流程</h4>
+            <div class="formula-step">
+                <h4>步驟一：頂層十字</h4>
+                <div class="code-box">1 2 3 5 6 4</div>
+            </div>
+            <div class="formula-step">
+                <h4>步驟二：頂面翻好 (黃色全滿)</h4>
+                <p>C1 公式：<br><div class="code-box">1 2 4 2 1 5 5 4 5</div></p>
+                <p>C2 公式：<br><div class="code-box">4 5 1 5 4 2 2 1 2</div></p>
+            </div>
+            <div class="formula-step">
+                <h4>步驟三：四角歸位</h4>
+                <div class="code-box">6 1 6 7 7 - 3 4 6 7 7 - 6 6</div>
+            </div>
+            <div class="formula-step">
+                <h4>步驟四：邊塊歸位</h4>
+                <div class="code-box">先轉 C1 + 再轉 C2</div>
+            </div>
+
+            <h4 class="section-subtitle">自主學習：精進優化</h4>
+            <div class="formula-step">
+                <h4>1. 觀察對稱性（左右手並用）</h4>
+                <p>在熟練基礎公式後，可以發現 C1 與 C2 互為「左右手對稱」公式。有意識地訓練左手肌肉記憶，在遇到特定黃色死角時直接用左手轉 C2，能省去將方塊轉向的時間。</p>
+            </div>
+            <div class="formula-step">
+                <h4>2. 四角歸位特殊捷徑</h4>
+                <p>若遇到四個角塊「完全沒有相同配對」的情形，傳統需要做兩次長公式。如果改用以下優化手法：</p>
+                <div class="code-box">先轉一次 C1 + 再轉四角歸位</div>
+                <p style="font-size: 0.95rem; color: #666; margin-top: 0.3rem;">便能精簡旋轉步驟，避開死記超長公式的痛苦。</p>
+            </div>
+
+            <hr style="border: 0; height: 1px; background: var(--light-milk-tea); margin: 1rem 0;">
+            <p style="font-size: 0.95rem; color:#666; margin-bottom: 0.5rem;">🔗 參考來源：</p>
+            <a href="https://www.davidguo.idv.tw/cube/beginner.html" target="_blank" class="source-link">1. 第一層解法</a> | 
+            <a href="https://www.davidguo.idv.tw/cube/beginner2.html" target="_blank" class="source-link">2. 第二層解法</a> | 
+            <a href="https://www.davidguo.idv.tw/cube/beginner3.html" target="_blank" class="source-link">3. 第三層解法</a> | 
+            <a href="https://www.davidguo.idv.tw/cube/Enhance.html" target="_blank" class="source-link">4. Enhance 延伸優化</a>
+            <br><br>
+            <a href="#top" class="btn" style="width:100%; text-align:center;">關閉並回首頁</a>
+        </div>
+    </div>
+
+
+    <div id="modal-advanced" class="modal">
+        <div class="modal-content">
+            <a href="#top" class="close-btn">&times;</a>
+            <h3>進階速解法 (CFOP) 深度探索</h3>
+            
+            <h4 class="section-subtitle">CFOP 的解法背景</h4>
+            <div class="formula-step">
+                <p>CFOP 是當今世界上最主流、使用人數最多的魔術方塊速解法。它起源於 1980 年代，由多位魔方玩家共同發展，並由 <b>Jessica Fridrich</b> 教授於 1997 年將其系統化整理並發表於網路上（因此又常被稱為 Fridrich Method）。</p>
+                <p style="margin-top: 0.4rem;">這套解法將原本 LBL 基礎解法中「一層一層」還原的邏輯，優化成「以區塊為單位」的高效率還原，是現今 WCA 國際賽事選手大幅突破速度極限的核心利器。</p>
+            </div>
+
+            <h4 class="section-subtitle">核心四大還原步驟</h4>
+            <div class="formula-step">
+                <h4>1. C - Cross (底層十字)</h4>
+                <p>在底部直接還原四個邊塊。高手通常會在 15 秒的觀察時間內規劃完畢，並在 8 步之內盲轉完成。</p>
+            </div>
+            <div class="formula-step">
+                <h4>2. F - F2L (First Two Layers，前兩層)</h4>
+                <p>同時將「一個邊塊與一個角塊」配對，一次塞入前兩層的空缺中。總共需要做 4 組配對，共包含 <b>41 個公式</b>。這是整個 CFOP 中最關鍵、最講求觀察力的階段。</p>
+            </div>
+            <div class="formula-step">
+                <h4>3. O - OLL (Orientation of the Last Layer，頂層朝向)</h4>
+                <p>將第三層（頂面）的顏色全部翻轉一致（如黃色全滿），共包含 <b>57 個公式</b>。</p>
+            </div>
+            <div class="formula-step">
+                <h4>4. P - PLL (Permutation of the Last Layer，頂層順序)</h4>
+                <p>在頂面顏色一致的情況下，調整頂層所有零件的位置，達成六面完全復原，共包含 <b>21 個公式</b>。</p>
+            </div>
+
+            <h4 class="section-subtitle">自主學習展望：兩段式 OP 減量背誦策略</h4>
+            <div class="formula-step">
+                <p>完整的 CFOP 總共包含驚人的 <b>119 個公式</b>（41+57+21），對於初學者來說是一座難以跨越的大山。因此，在一小時學盲解的教學中，推薦了最理想的銜接策略——<b>「兩段式 OP (Two-Look OLL / PLL)」</b>：</p>
+                <ul style="margin-left: 2rem; margin-top: 0.4rem;">
+                    <li><b>兩段式 OLL (減至 10 個公式)：</b>第一步先用基礎十字口訣做出頂層十字，第二步再從 7 個小魚形公式中挑出一個來翻滿頂面。</li>
+                    <li><b>兩段式 PLL (減至 6 個公式)：</b>第一步先觀察並還原四個角塊的位置（如黃色換角），第二步再處理剩下邊塊的位置。</li>
+                </ul>
+                <p style="margin-top: 0.5rem; font-weight: bold; color: #6d594b;">💡 心得總結：</p>
+                <p>透過兩段式 OP 策略，我只需要背誦 <b>16 個核心公式</b>，就能將復原流程完全套入進階速解的邏輯架構中！這是我挑戰進入「30秒俱樂部」的最佳工具！</p>
+            </div>
+
+            <hr style="border: 0; height: 1px; background: var(--light-milk-tea); margin: 1rem 0;">
+            <a href="https://1hrbld.tw/cfop-introduction/" target="_blank" class="source-link">🔗 參考來源：一小時學盲解 - 三階進階CFOP速解法介紹</a>
+            <br><br>
+            <a href="#top" class="btn" style="width:100%; text-align:center;">關閉並回首頁</a>
+        </div>
+    </div>
+
+</body>
+</html>
